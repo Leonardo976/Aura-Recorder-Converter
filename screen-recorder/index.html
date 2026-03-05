@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Aura Recorder</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<!-- SPLASH SCREEN -->
+<div id="splash-screen">
+  <img src="logo.png" alt="Aura Logo" class="splash-logo">
+  <div class="splash-text">Aura Recorder</div>
+</div>
+
+<div class="background">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+</div>
+
+<div class="app-container">
+  <!-- Global Window Controls - ABSOLUTE TOP RIGHT -->
+  <div class="window-controls" id="window-controls">
+    <button id="btn-win-min" class="win-btn" title="Minimizar"><i class="ph ph-minus"></i></button>
+    <button id="btn-win-max" class="win-btn" title="Maximizar"><i class="ph ph-square"></i></button>
+    <button id="btn-win-close" class="win-btn close" title="Cerrar"><i class="ph ph-x"></i></button>
+  </div>
+
+  <!-- Main Menu -->
+  <div id="main-menu" class="view">
+    <!-- Logo difuminado de fondo -->
+    <div class="menu-logo-bg"></div>
+    <!-- Title Bar with Settings on LEFT -->
+    <div class="title-bar">
+      <button id="btn-settings" class="icon-btn" title="Configuración"><i class="ph ph-keyboard"></i></button>
+      <h1>Aura Recorder</h1>
+    </div>
+
+    <div class="menu-options">
+      <button id="btn-record-screen" class="big-btn">
+        <i class="ph ph-monitor icon"></i>
+        <span>Grabar Pantalla</span>
+      </button>
+      <button id="btn-record-app" class="big-btn">
+        <i class="ph ph-app-window icon"></i>
+        <span>Grabar Aplicación</span>
+      </button>
+      <button id="btn-converter" class="big-btn">
+        <i class="ph ph-arrows-clockwise icon"></i>
+        <span>Convertir Video/Audio</span>
+      </button>
+    </div>
+
+    <div class="settings-preview">
+      <div class="setting-item">
+        <label>FPS:</label>
+        <select id="fps-select">
+          <option value="30">30 FPS</option>
+          <option value="60" selected>60 FPS</option>
+          <option value="90">90 FPS</option>
+          <option value="120">120 FPS</option>
+        </select>
+      </div>
+      <div class="setting-item">
+        <label>Res:</label>
+        <select id="res-select">
+          <option value="720">HD (720p)</option>
+          <option value="1080" selected>FHD (1080p)</option>
+          <option value="1440">2K (1440p)</option>
+          <option value="2160">4K (2160p)</option>
+        </select>
+      </div>
+      <div class="setting-item">
+        <label>Formato:</label>
+        <select id="format-select">
+          <optgroup label="Video">
+            <option value="video/webm;codecs=vp9" selected>WebM (VP9)</option>
+            <option value="video/x-matroska;codecs=avc1">MKV (Matroska)</option>
+            <option value="video/mp4">MP4 (H.264)</option>
+          </optgroup>
+          <optgroup label="Audio">
+            <option value="audio/wav">WAV Audio</option>
+            <option value="audio/mp3">MP3 Audio</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Source Selection -->
+  <div id="source-selection" class="view hidden">
+    <div class="header">
+      <button id="btn-back-to-menu" class="btn-small"><i class="ph ph-arrow-left"></i> Volver</button>
+      <h2>Selecciona una fuente</h2>
+    </div>
+    <div id="sources-grid" class="grid-container"></div>
+  </div>
+
+  <!-- Recording View -->
+  <div id="recording-view" class="view hidden">
+    <div id="countdown-overlay" class="hidden">
+      <span id="countdown-number">3</span>
+    </div>
+
+    <!-- Back Button -->
+    <button id="btn-back-from-recording" class="btn-back-top"><i class="ph ph-arrow-left"></i> Volver</button>
+
+    <div class="status-indicator">
+      <span class="dot"></span>
+      <span id="recording-timer">00:00:00</span>
+    </div>
+
+    <div class="preview-monitor">
+      <video id="live-preview" autoplay muted></video>
+    </div>
+
+    <div class="controls-bar">
+      <button id="btn-start-recording" class="control-btn success"><i class="ph ph-record"></i></button>
+      <button id="btn-pause" class="control-btn warning hidden"><i class="ph ph-pause"></i></button>
+      <button id="btn-resume" class="control-btn success hidden"><i class="ph ph-play"></i></button>
+      <button id="btn-stop" class="control-btn danger hidden"><i class="ph ph-stop"></i></button>
+      <div class="separator"></div>
+      <button id="btn-mic-toggle" class="control-btn"><i class="ph ph-microphone"></i></button>
+      <button id="btn-sys-toggle" class="control-btn"><i class="ph ph-speaker-high"></i></button>
+      <div class="separator"></div>
+      <button id="btn-mini-mode" class="control-btn"><i class="ph ph-corners-in"></i></button>
+    </div>
+  </div>
+
+  <!-- Mini Bar -->
+  <div id="mini-bar-view" class="view hidden mini-bar">
+    <div class="mini-content">
+      <div class="mini-timer" id="mini-timer">00:00</div>
+      <button id="btn-mini-start" class="mini-btn success"><i class="ph ph-record"></i></button>
+      <button id="btn-mini-pause" class="mini-btn warning hidden"><i class="ph ph-pause"></i></button>
+      <button id="btn-mini-resume" class="mini-btn success hidden"><i class="ph ph-play"></i></button>
+      <button id="btn-mini-stop" class="mini-btn danger hidden"><i class="ph ph-stop"></i></button>
+      <div class="mini-separator"></div>
+      <button id="btn-mini-mic" class="mini-btn"><i class="ph ph-microphone"></i></button>
+      <button id="btn-mini-sys" class="mini-btn"><i class="ph ph-speaker-high"></i></button>
+      <div class="mini-separator"></div>
+      <button id="btn-mini-expand" class="mini-btn"><i class="ph ph-arrows-out-simple"></i></button>
+      <button id="btn-mini-hide" class="mini-btn"><i class="ph ph-eye-slash"></i></button>
+    </div>
+  </div>
+
+  <!-- Hidden Restore Button -->
+  <div id="hidden-restore-btn" class="hidden-trigger hidden">
+    <i class="ph ph-caret-left"></i>
+  </div>
+
+  <!-- Review View -->
+  <div id="review-view" class="view hidden">
+    <h2>Vista Previa</h2>
+    <div class="video-container">
+      <!-- CUSTOM PLAYER -->
+      <div class="player-wrapper" id="player-wrapper">
+        <video id="recorded-video" class="video-content" playsinline></video>
+        <canvas id="audio-visualizer"></canvas>
+
+        <div class="custom-controls">
+          <div class="timeline-container" id="timeline-container">
+            <div class="timeline-bg">
+              <div class="timeline-fill" id="timeline-fill">
+                <div class="timeline-thumb"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls-row">
+            <div class="left-controls">
+              <button id="player-play-btn" class="player-btn"><i class="ph ph-play"></i></button>
+              <button id="player-stop-btn" class="player-btn"><i class="ph ph-arrow-counter-clockwise"></i></button>
+              <div class="time-display">
+                <span id="cur-time">00:00</span> / <span id="dur-time">00:00</span>
+              </div>
+            </div>
+            <div class="right-controls">
+              <button id="player-vol-btn" class="player-btn"><i class="ph ph-speaker-high"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button id="btn-discard" class="btn-secondary"><i class="ph ph-trash"></i> Eliminar</button>
+      <button id="btn-save" class="btn-primary"><i class="ph ph-floppy-disk"></i> Guardar</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Atajos de Teclado</h2>
+        <button id="btn-close-settings" class="icon-btn-small"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="keybind-list">
+        <div class="keybind-row">
+          <span>Pausar/Reanudar</span>
+          <button class="keybind-btn" id="bind-pause">F9</button>
+        </div>
+        <div class="keybind-row">
+          <span>Detener</span>
+          <button class="keybind-btn" id="bind-stop">F10</button>
+        </div>
+        <div class="keybind-row">
+          <span>Silenciar Mic</span>
+          <button class="keybind-btn" id="bind-mic">F11</button>
+        </div>
+        <div class="keybind-row">
+          <span>Silenciar Audio PC</span>
+          <button class="keybind-btn" id="bind-sys">F12</button>
+        </div>
+      </div>
+      <p class="hint">Clic para asignar. ESC para cancelar.</p>
+    </div>
+  </div>
+
+  <!-- Converter Modal -->
+  <div id="converter-modal" class="modal hidden">
+    <div class="modal-content converter-modal-content">
+      <div class="modal-header">
+        <h2>Convertir Video/Audio</h2>
+        <button id="btn-close-converter" class="icon-btn-small"><i class="ph ph-x"></i></button>
+      </div>
+
+      <div class="converter-body">
+        <!-- File Selection Area -->
+        <div id="file-drop-zone" class="file-drop-zone">
+          <i class="ph ph-file-video drop-icon"></i>
+          <p class="drop-text">Arrastra un archivo aquí</p>
+          <p class="drop-subtext">o</p>
+          <button id="btn-browse-file" class="btn-browse">Seleccionar Archivo</button>
+          <p class="supported-formats">Formatos soportados: WebM, MP4, MKV, AVI, WAV, MP3, AAC, FLAC, OGG</p>
+        </div>
+
+        <!-- File Info Display (hidden initially) -->
+        <div id="file-info-panel" class="file-info-panel hidden">
+          <div class="file-info-header">
+            <i class="ph ph-file-video"></i>
+            <div class="file-info-details">
+              <div class="file-name" id="source-file-name">archivo.webm</div>
+              <div class="file-meta" id="source-file-meta">1920x1080 • 60 FPS • 2:30</div>
+            </div>
+            <button id="btn-change-file" class="btn-change-file"><i class="ph ph-arrow-clockwise"></i> Cambiar</button>
+          </div>
+        </div>
+
+        <!-- Format Selection -->
+        <div id="format-selection-panel" class="format-selection-panel hidden">
+          <h3>Formato de Salida</h3>
+
+          <!-- Video Formats Section -->
+          <div id="video-formats-section" class="format-section">
+            <h4 class="section-title">
+              <i class="ph ph-file-video"></i> Formatos de Video
+            </h4>
+            <div class="format-grid">
+              <button class="format-card" data-format="mp4">
+                <i class="ph ph-file-video"></i>
+                <span>MP4</span>
+                <small>H.264 (Universal)</small>
+              </button>
+              <button class="format-card" data-format="webm">
+                <i class="ph ph-file-video"></i>
+                <span>WebM</span>
+                <small>VP9 (Alta Calidad)</small>
+              </button>
+              <button class="format-card" data-format="mkv">
+                <i class="ph ph-file-video"></i>
+                <span>MKV</span>
+                <small>Matroska</small>
+              </button>
+              <button class="format-card" data-format="avi">
+                <i class="ph ph-file-video"></i>
+                <span>AVI</span>
+                <small>Compatible</small>
+              </button>
+            </div>
+          </div>
+
+          <!-- Audio Formats Section -->
+          <div id="audio-formats-section" class="format-section">
+            <h4 class="section-title">
+              <i class="ph ph-file-audio"></i> Formatos de Audio
+            </h4>
+            <div class="format-grid">
+              <button class="format-card" data-format="mp3">
+                <i class="ph ph-file-audio"></i>
+                <span>MP3</span>
+                <small>Audio 320kbps</small>
+              </button>
+              <button class="format-card" data-format="wav">
+                <i class="ph ph-file-audio"></i>
+                <span>WAV</span>
+                <small>Sin Compresión</small>
+              </button>
+              <button class="format-card" data-format="aac">
+                <i class="ph ph-file-audio"></i>
+                <span>AAC</span>
+                <small>Audio Alta Calidad</small>
+              </button>
+              <button class="format-card" data-format="flac">
+                <i class="ph ph-file-audio"></i>
+                <span>FLAC</span>
+                <small>Lossless</small>
+              </button>
+              <button class="format-card" data-format="ogg">
+                <i class="ph ph-file-audio"></i>
+                <span>OGG</span>
+                <small>Vorbis</small>
+              </button>
+            </div>
+          </div>
+
+          <!-- Options Grid -->
+          <div class="options-grid">
+            <div class="option-group">
+              <label>Calidad:</label>
+              <select id="quality-select">
+                <option value="high">Alta (Mejor Calidad)</option>
+                <option value="medium" selected>Media (Balanceada)</option>
+                <option value="low">Baja (Menor Tamaño)</option>
+              </select>
+            </div>
+
+            <div class="option-group">
+              <label>Fotogramas (FPS):</label>
+              <select id="fps-picker-unique">
+                <option value="original" selected>Originales (Variable)</option>
+                <option value="60">60 FPS (Estándar)</option>
+                <option value="30">30 FPS (TV/Cine)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conversion Progress -->
+      <div id="conversion-progress-panel" class="conversion-progress-panel hidden">
+        <div class="progress-info">
+          <span id="progress-text">Convirtiendo...</span>
+          <span id="progress-percent">0%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+        <button id="btn-cancel-conversion" class="btn-cancel">Cancelar</button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div id="converter-actions" class="converter-actions hidden">
+        <button id="btn-start-conversion" class="btn-primary" disabled>
+          <i class="ph ph-arrows-clockwise"></i> Convertir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- FPS Warning Toast Container -->
+<div id="fps-warning-container" class="fps-warning-container"></div>
+
+<!-- Custom Alert/Confirm Container -->
+<div id="custom-modal-container"></div>
+
+<script src="renderer.js"></script>
+</body>
+
+</html>
