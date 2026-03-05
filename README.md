@@ -5,7 +5,7 @@
 
 **Aura Recorder** es una aplicación de escritorio potente, moderna y ligera diseñada para capturar tu pantalla, aplicaciones específicas y convertir archivos multimedia con una interfaz elegante y minimalista.
 
-![Logo](logo.png)
+![Logo](screen-recorder/logo.png)
 
 ## ✨ Características Principales
 
